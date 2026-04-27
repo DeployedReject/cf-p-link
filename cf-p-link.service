@@ -1,0 +1,15 @@
+[Unit]
+Description=Cloudflare Persistent Tunnel Manager
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=vaibhav
+WorkingDirectory=/home/vaibhav/projects/cf-p-link
+ExecStart=/home/vaibhav/projects/cf-p-link/target/tunnel-daemon-native
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

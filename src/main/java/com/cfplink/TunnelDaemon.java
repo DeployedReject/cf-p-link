@@ -133,7 +133,7 @@ public class TunnelDaemon {
         // Or wait, in pom.xml I used finalName "tunnel-daemon". And appendAssemblyId was false.
         // So the final jar will be "target/tunnel-daemon.jar".
         
-        String correctExecStart = javaExec + " -jar " + currentPath + "/target/tunnel-daemon.jar";
+        String correctExecStart = currentPath + "/target/tunnel-daemon-native";
 
         String finalServiceFile = serviceFile.replace("ExecStart=" + javaExec + " -cp target/setup-cli-jar-with-dependencies.jar target/tunnel-daemon-jar-with-dependencies.jar com.cfplink.TunnelDaemon", "ExecStart=" + correctExecStart);
         
