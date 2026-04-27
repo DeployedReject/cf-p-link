@@ -1,0 +1,12 @@
+{
+  "cloudflareApiToken": "cfut_Z3oGYDImWL3HS3L96UYxXhsptABDmOe2rro2aKev09e01ccb",
+  "cloudflareAccountId": "5ab0906c39cba15e637e910e8ec00a56",
+  "workerName": "d4c",
+  "services": [
+    {
+      "name": "website",
+      "port": 10000,
+      "path": "/website"
+    }
+  ]
+}
