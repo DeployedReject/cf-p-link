@@ -36,10 +36,14 @@ public class ProcessHandler {
         currentUrl = null;
 
         try {
-            System.out.println("[ProcessHandler] Starting tunnel for service " + service.getName() + " on port " + service.getPort());
+            String targetUrl = "http://localhost:" + service.getPort();
+            if (service.getLocalPath() != null && !service.getLocalPath().isEmpty()) {
+                targetUrl += service.getLocalPath();
+            }
+            System.out.println("[ProcessHandler] Starting tunnel for service " + service.getName() + " on " + targetUrl);
             
             ProcessBuilder builder = new ProcessBuilder(
-                    "cloudflared", "tunnel", "--protocol", "http2", "--url", "http://localhost:" + service.getPort()
+                    "cloudflared", "tunnel", "--protocol", "http2", "--url", targetUrl
             );
 
             // Merge start out and err so we don't need two readers

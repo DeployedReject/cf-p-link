@@ -102,7 +102,13 @@ public class SetupCLI {
             String isApiInput = scanner.nextLine().trim().toLowerCase();
             boolean isApi = isApiInput.equals("y") || isApiInput.equals("yes");
 
-            config.getServices().add(new AppConfig.ServiceConfig(name, port, path, isApi));
+            System.out.print("Enter the local subpath for this service if any (e.g., /api, default: none): ");
+            String localPath = scanner.nextLine().trim();
+            if (!localPath.isEmpty() && !localPath.startsWith("/")) {
+                localPath = "/" + localPath;
+            }
+
+            config.getServices().add(new AppConfig.ServiceConfig(name, port, path, isApi, localPath));
         }
 
         System.out.println("\nConfiguration complete! Saving to " + CONFIG_FILE_NAME + "...");
