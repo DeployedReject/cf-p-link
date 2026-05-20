@@ -2,5 +2,5 @@ com/cfplink/ProcessHandler.class
 com/cfplink/WorkerManager.class
 com/cfplink/SetupCLI.class
 com/cfplink/AppConfig.class
-com/cfplink/TunnelDaemon.class
 com/cfplink/AppConfig$ServiceConfig.class
+com/cfplink/TunnelDaemon.class

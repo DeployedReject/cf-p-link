@@ -120,11 +120,17 @@ public class WorkerManager {
                "  for (const [prefix, targetUrl] of Object.entries(serviceMap)) {\n" +
                "    if (path === prefix || path.startsWith(prefix + \"/\")) {\n" +
                "       const suffix = path.substring(prefix.length);\n" +
-               "       const mappedUrl = targetUrl + suffix + url.search;\n" +
-               "       // Transparent reverse proxy instead of simple redirect could be used, \n" +
-               "       // but redirecting to trycloudflare ensures that cloudflare access pages work,\n" +
-               "       // and tunnels serve exactly as if accessed directly.\n" +
-               "       return Response.redirect(mappedUrl, 302);\n" +
+               "       let destUrl = targetUrl;\n" +
+               "       if (destUrl.endsWith(\"/\") && suffix.startsWith(\"/\")) {\n" +
+               "          destUrl = destUrl.slice(0, -1) + suffix;\n" +
+               "       } else if (!destUrl.endsWith(\"/\") && !suffix.startsWith(\"/\")) {\n" +
+               "          destUrl = destUrl + \"/\" + suffix;\n" +
+               "       } else {\n" +
+               "          destUrl = destUrl + suffix;\n" +
+               "       }\n" +
+               "       const mappedUrl = destUrl + url.search;\n" +
+               "       const response = await fetch(mappedUrl, request);\n" +
+               "       return new Response(response.body, response);\n" +
                "    }\n" +
                "  }\n" +
                "\n" +

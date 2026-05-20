@@ -73,3 +73,31 @@ If you prefer testing before installing as a service, you can run the binaries d
 ## Configuration File
 
 The `config.json` file stores all necessary information. If you ever need to change the Cloudflare API Token, Account ID, or service mappings, you can manually edit `config.json` (located at `/opt/cf-p-link/config.json` if installed system-wide) or re-run the `setup-cli-native` tool in that directory.
+
+## Uninstallation
+
+If you need to completely remove `cf-p-link` from your system, run the following commands:
+
+1. **Stop and disable the systemd service:**
+   ```bash
+   sudo systemctl disable --now cf-p-link.service
+   ```
+
+2. **Remove the systemd service file:**
+   ```bash
+   sudo rm /etc/systemd/system/cf-p-link.service
+   sudo systemctl daemon-reload
+   sudo systemctl reset-failed
+   ```
+
+3. **Remove the installed binaries:**
+   ```bash
+   sudo rm /usr/local/bin/setup-cli-native
+   sudo rm /usr/local/bin/tunnel-daemon-native
+   ```
+
+4. **Remove the configuration directory (this deletes all setup data and API tokens):**
+   ```bash
+   sudo rm -rf /opt/cf-p-link
+   ```
+
