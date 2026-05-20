@@ -25,6 +25,7 @@ public class AppConfig {
         private String name;
         private int port;
         private String path;
+        private boolean isApi;
 
         public ServiceConfig() {}
 
@@ -32,6 +33,14 @@ public class AppConfig {
             this.name = name;
             this.port = port;
             this.path = path;
+            this.isApi = false;
+        }
+
+        public ServiceConfig(String name, int port, String path, boolean isApi) {
+            this.name = name;
+            this.port = port;
+            this.path = path;
+            this.isApi = isApi;
         }
 
         public String getName() { return name; }
@@ -42,5 +51,8 @@ public class AppConfig {
 
         public String getPath() { return path; }
         public void setPath(String path) { this.path = path; }
+
+        public boolean isApi() { return isApi; }
+        public void setApi(boolean isApi) { this.isApi = isApi; }
     }
 }

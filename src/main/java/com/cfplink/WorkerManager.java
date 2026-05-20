@@ -72,20 +72,21 @@ public class WorkerManager {
     }
 
     private String generateWorkerScript(Map<String, String> pathToUrlMap) {
-        StringBuilder serviceMapJs = new StringBuilder("const serviceMap = {\n");
-        StringBuilder serviceNamesJs = new StringBuilder("const serviceNames = {\n");
+        StringBuilder servicesJs = new StringBuilder("const services = {\n");
 
         for (AppConfig.ServiceConfig service : config.getServices()) {
             if (pathToUrlMap.containsKey(service.getPath())) {
                 String tunnelUrl = pathToUrlMap.get(service.getPath());
-                serviceMapJs.append(String.format("  \"%s\": \"%s\",\n", service.getPath(), tunnelUrl));
-                serviceNamesJs.append(String.format("  \"%s\": \"%s (Port %d)\",\n", service.getPath(), service.getName(), service.getPort()));
+                servicesJs.append(String.format("  \"%s\": {\n", service.getPath()));
+                servicesJs.append(String.format("    url: \"%s\",\n", tunnelUrl));
+                servicesJs.append(String.format("    name: \"%s (Port %d)\",\n", service.getName(), service.getPort()));
+                servicesJs.append(String.format("    isApi: %b\n", service.isApi()));
+                servicesJs.append("  },\n");
             }
         }
-        serviceMapJs.append("};\n\n");
-        serviceNamesJs.append("};\n\n");
+        servicesJs.append("};\n\n");
 
-        return serviceMapJs.toString() + serviceNamesJs.toString() +
+        return servicesJs.toString() +
                "addEventListener('fetch', event => {\n" +
                "  event.respondWith(handleRequest(event.request));\n" +
                "});\n" +
@@ -108,19 +109,20 @@ public class WorkerManager {
                "    <div class=\"container\">\n" +
                "      <h1>Available Hosted Services</h1>\n" +
                "      <ul>`;\n" +
-               "    for (const [p, name] of Object.entries(serviceNames)) {\n" +
-               "       let urlObj = new URL(serviceMap[p]);\n" +
-               "       let displayUrl = serviceMap[p];\n" +
-               "       html += `<li><a href=\"${p}\">${name} <span>&rarr;</span> <code>${p}</code></a> <br><small style=\"color:#94a3b8\">Proxies to ${displayUrl}</small></li>`;\n" +
+               "    for (const [p, service] of Object.entries(services)) {\n" +
+               "       let displayUrl = service.url;\n" +
+               "       html += `<li><a href=\"${p}\">${service.name} <span>&rarr;</span> <code>${p}</code></a> <br><small style=\"color:#94a3b8\">Proxies to ${displayUrl} (${service.isApi ? 'API' : 'User Redirect'})</small></li>`;\n" +
                "    }\n" +
                "    html += `</ul></div></body></html>`;\n" +
                "    return new Response(html, { headers: { 'Content-Type': 'text/html' } });\n" +
                "  }\n" +
                "\n" +
-               "  for (const [prefix, targetUrl] of Object.entries(serviceMap)) {\n" +
+               "  const sortedPrefixes = Object.keys(services).sort((a, b) => b.length - a.length);\n" +
+               "  for (const prefix of sortedPrefixes) {\n" +
+               "    const service = services[prefix];\n" +
                "    if (path === prefix || path.startsWith(prefix + \"/\")) {\n" +
                "       const suffix = path.substring(prefix.length);\n" +
-               "       let destUrl = targetUrl;\n" +
+               "       let destUrl = service.url;\n" +
                "       if (destUrl.endsWith(\"/\") && suffix.startsWith(\"/\")) {\n" +
                "          destUrl = destUrl.slice(0, -1) + suffix;\n" +
                "       } else if (!destUrl.endsWith(\"/\") && !suffix.startsWith(\"/\")) {\n" +
@@ -129,8 +131,12 @@ public class WorkerManager {
                "          destUrl = destUrl + suffix;\n" +
                "       }\n" +
                "       const mappedUrl = destUrl + url.search;\n" +
-               "       const response = await fetch(mappedUrl, request);\n" +
-               "       return new Response(response.body, response);\n" +
+               "       if (service.isApi) {\n" +
+               "          const response = await fetch(mappedUrl, request);\n" +
+               "          return new Response(response.body, response);\n" +
+               "       } else {\n" +
+               "          return Response.redirect(mappedUrl, 302);\n" +
+               "       }\n" +
                "    }\n" +
                "  }\n" +
                "\n" +

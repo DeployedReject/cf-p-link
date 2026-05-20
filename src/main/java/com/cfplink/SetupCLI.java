@@ -98,7 +98,11 @@ public class SetupCLI {
                 path = "/" + path;
             }
 
-            config.getServices().add(new AppConfig.ServiceConfig(name, port, path));
+            System.out.print("Is this an API endpoint (uses transparent reverse proxy instead of 302 Redirect)? (y/n, default: n): ");
+            String isApiInput = scanner.nextLine().trim().toLowerCase();
+            boolean isApi = isApiInput.equals("y") || isApiInput.equals("yes");
+
+            config.getServices().add(new AppConfig.ServiceConfig(name, port, path, isApi));
         }
 
         System.out.println("\nConfiguration complete! Saving to " + CONFIG_FILE_NAME + "...");
