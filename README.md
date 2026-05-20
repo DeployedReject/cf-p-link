@@ -20,58 +20,56 @@ The resulting executables will be available in the `target/` directory:
 - `target/setup-cli-native`
 - `target/tunnel-daemon-native`
 
-## Setup
+## System-Wide Installation & Setup (Recommended)
 
-Before running the daemon, you need to configure your Cloudflare credentials and map your services.
+For a persistent and standardized setup on Linux, it is highly recommended to move the binaries to `/usr/local/bin` and store configuration in `/opt/cf-p-link`. This ensures the daemon is not accidentally deleted during development or cleanup.
 
-1. Run the setup CLI tool:
+1. **Copy Binaries to standard execution path:**
    ```bash
-   ./target/setup-cli-native
+   sudo cp target/setup-cli-native /usr/local/bin/
+   sudo cp target/tunnel-daemon-native /usr/local/bin/
    ```
-2. Follow the interactive prompts to provide your Cloudflare API Token. The tool will automatically fetch your Account ID and configure the routes.
-3. Once configured, a `config.json` file will be created in the current directory.
 
-## Running the Daemon
+2. **Create the configuration directory:**
+   ```bash
+   sudo mkdir -p /opt/cf-p-link
+   ```
 
-You can run the daemon directly:
+3. **Run the setup CLI tool from the configuration directory:**
+   ```bash
+   cd /opt/cf-p-link
+   sudo setup-cli-native
+   ```
+   Follow the interactive prompts to provide your Cloudflare API Token. Once configured, a `config.json` file will be created in `/opt/cf-p-link`.
 
-```bash
-./target/tunnel-daemon-native
-```
-
-However, for a persistent setup, it is highly recommended to run it as a systemd service so it automatically starts on boot and restarts on failure.
-
-## Systemd Service Installation
-
-A `cf-p-link.service` file has been provided in the root directory (or can be generated automatically by running `./target/tunnel-daemon-native --install-systemd`).
-
-To install and enable the systemd service, follow these steps:
-
-1. Copy the service file to the systemd directory:
+4. **Install and enable the Systemd service:**
+   A `cf-p-link.service` file is provided in the repository root (already configured to use `/usr/local/bin` and `/opt/cf-p-link`).
+   
    ```bash
    sudo cp cf-p-link.service /etc/systemd/system/
-   ```
-
-2. Reload the systemd daemon to recognize the new service:
-   ```bash
    sudo systemctl daemon-reload
-   ```
-
-3. Enable the service to start automatically on boot and start it immediately:
-   ```bash
    sudo systemctl enable --now cf-p-link.service
    ```
 
-4. Check the status of the service to ensure it is running correctly:
+5. **Check the status and logs:**
    ```bash
    sudo systemctl status cf-p-link.service
+   sudo journalctl -u cf-p-link.service -f
    ```
 
-5. To view the logs, use `journalctl`:
+## Manual Execution (Without Systemd)
+
+If you prefer testing before installing as a service, you can run the binaries directly from your project folder:
+
+1. Configure your services first:
    ```bash
-   sudo journalctl -u cf-p-link.service -f
+   ./target/setup-cli-native
+   ```
+2. Start the daemon directly:
+   ```bash
+   ./target/tunnel-daemon-native
    ```
 
 ## Configuration File
 
-The `config.json` file stores all necessary information. If you ever need to change the Cloudflare API Token, Account ID, or service mappings, you can manually edit `config.json` or re-run the `setup-cli-native` tool.
+The `config.json` file stores all necessary information. If you ever need to change the Cloudflare API Token, Account ID, or service mappings, you can manually edit `config.json` (located at `/opt/cf-p-link/config.json` if installed system-wide) or re-run the `setup-cli-native` tool in that directory.
